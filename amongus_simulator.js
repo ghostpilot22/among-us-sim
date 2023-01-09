@@ -1,5 +1,5 @@
 /*
-	Among Us Simulator, version 0.5.1
+	Among Us Simulator, version 0.5.2
 	Made by Sparrow.
 	Inspired by Orteil's Murdergames.
 */
@@ -20,16 +20,17 @@
 		Importing crew from a file
 		Inputting crew from interface
 		Emergency meeting button
+		Sabotages
 */
 
 
 // Characters go here - maybe in the future implement reading from an interface rather than hard coding
-initial_crewmate = 3; // set to number of crewmates
-initial_impostor = 1; // set to number of imps
-total_crew = initial_crewmate + initial_impostor;
-TASKS = 4; // number of tasks
-ITERATOR = 0;
-crew = [];
+let initial_crewmate = 3; // set to number of crewmates
+let initial_impostor = 1; // set to number of imps
+let total_crew = initial_crewmate + initial_impostor;
+let TASKS = 4; // number of tasks
+let ITERATOR = 0;
+let crew = [];
 // No perks yet.
 // Crew setup:
 {
@@ -85,20 +86,20 @@ crew = [];
 
 // Setup:
 {
-alive_crewmate = initial_crewmate;
-alive_impostor = initial_impostor;
-game_over = false;
-meeting = false;
-dead_this_round = 0;
-round_num = 1;
-part_num = 1;
+	var alive_crewmate = initial_crewmate;
+	var alive_impostor = initial_impostor;
+	var game_over = false;
+	var meeting = false;
+	var dead_this_round = 0;
+	var round_num = 1;
+	var part_num = 1;
 }
 
 // List the crew:
 {
 	console.log("\nCrew:");
-	role = "";
-	for(var i=0; i<ITERATOR; i++)
+	let role = "";
+	for(let i=0; i<ITERATOR; i++)
 	{
 		if(crew[i]["is_imp"]) role = "Impostor";
 		else role = "Crewmate";
@@ -145,8 +146,8 @@ while(!game_over)
 	console.log("Alive Crewmates: " + alive_crewmate);
 	console.log("Alive Impostors: " + alive_impostor);
 	console.log("\nCrew:");
-	mood = ""; // call this something better
-	for(i=0; i<ITERATOR; i++)
+	let mood = ""; // call this something better
+	for(var i=0; i<ITERATOR; i++)
 	{
 		if(crew[i]["alive"]) mood = "alive";
 		else mood = "dead";
@@ -156,16 +157,17 @@ while(!game_over)
 		}
 		else
 		{
-			tasks_done = TASKS - crew[i]["tasks_left"];
+			let tasks_done = TASKS - crew[i]["tasks_left"];
 			console.log(crew[i]["name"] + " (Crewmate) (" + mood + ") (" + tasks_done + "/" + TASKS + " tasks)");
 		}
 	}
 }
 
 // Round
-function round_part() // Returns 0 for nothing happens, 1 for body found, 2 for imp win, 3 for task win.
+// Returns 0 for nothing happens, 1 for body found, 2 for imp win, 3 for task win.
+function round_part()
 {
-	for(var i = 0; i < total_crew; i++)
+	for(let i = 0; i < total_crew; i++)
 	{
 		// each character does 1 action
 		// maybe implement random order?
@@ -209,7 +211,7 @@ function round_part() // Returns 0 for nothing happens, 1 for body found, 2 for 
 // Returns 0 for nothing interesting happens, 1 for body found
 function crewmate_action(i)
 {
-	pick = Math.floor(Math.random() * 5);
+	let pick = Math.floor(Math.random() * 5);
 	// Roll a - currently 4 - sided die.
 	// Currently: On a 0 or 1 they do a task. 
 	// On 4 they find a body, if there is one
@@ -242,14 +244,14 @@ function crewmate_action(i)
 // for the flavor text
 function impostor_action(i)
 {
-	pick = Math.floor(Math.random() * 3); // get a random int between, for now, 0 and 2
+	let pick = Math.floor(Math.random() * 3); // get a random int between, for now, 0 and 2
 	switch(pick)
 	{
 		case 0:
 			console.log(crew[i]["name"] + " fakes a task!");
 			break;
 		case 1: // case KILL
-			vic = Math.floor(Math.random() * total_crew); // random int btwn 0 and total_crew
+			let vic = Math.floor(Math.random() * total_crew); // random int btwn 0 and total_crew
 			if(crew[vic]["alive"] && !crew[vic]["is_imp"])
 			{
 				console.log(crew[i]["name"] + " kills " + crew[vic]["name"] + "!");
@@ -267,7 +269,7 @@ function impostor_action(i)
 // Dead crew can still do tasks!
 function ghost_action(i)
 {
-	pick = Math.floor(Math.random() * 2);// get a random int between, for now, 0 and 1
+	let pick = Math.floor(Math.random() * 2);// get a random int between, for now, 0 and 1
 	switch(pick)
 	{
 		case 0:
@@ -292,7 +294,7 @@ function body_found(i)
 // Check if tasks are done.
 function check_tasks_done()
 {
-	for(var i = 0; i < total_crew; i++)
+	for(let i = 0; i < total_crew; i++)
 	{
 		if(!crew[i]["is_imp"])
 			if(crew[i]["tasks_left"] > 0)
@@ -306,13 +308,21 @@ function check_tasks_done()
 // Or if you're pre-selecting the impostors, 2 for each
 // Just name the perks here, and state modified chances
 // and chance of perk events + any needed variables
-// don't list perk events here
+// don't list perk events right here
 
 
 
 // Events go here.
 {
-	base_crew_idles = [];
-	base_imp_idles = [];
-	base_ghost_idles = [];
+	const base_crew_idles = [
+		"thinks about doing a task, but doesn't feel like it.",
+		"idles around."
+	];
+	
+	const base_imp_idles = [];
+	const base_ghost_idles = [];
+	
+	const task_lines = [];
+	const interrupted_task_lines = [];
+	const kill_lines = [];
 }

@@ -1,5 +1,5 @@
 /*
-	Among Us Simulator, version 0.5.2
+	Among Us Simulator, version 0.5.3
 	Made by Sparrow.
 	Inspired by Orteil's Murdergames.
 */
@@ -10,17 +10,21 @@
 		Meetings and ejections
 		Randomizing the order of events in part-rounds
 		Determining whose body is found
+		Task bar at the end of each meeting
 	Coming less soon:
 		Random impostor mode
 		Perks (affecting flavor text as well as likelihood of tasking/killing)
 	Maybe coming eventually:
 		Suspiciousness levels that can change during meetings
 		Votes
+		Pronouns
 		Rooms
 		Importing crew from a file
 		Inputting crew from interface
 		Emergency meeting button
 		Sabotages
+		Tasks being assigned to crewmates... or would that make it less random and thus less interesting?
+		Map options (would change the idles available, as well as the rooms if those get implemented)
 */
 
 
@@ -309,20 +313,110 @@ function check_tasks_done()
 // Just name the perks here, and state modified chances
 // and chance of perk events + any needed variables
 // don't list perk events right here
+{
+	/*
+	Perk ideas:
+		Slow tasker (crew) (more likely to be sussed/ejected?)
+		Fast tasker (crew)
+		*Slow killer (imp) (less sus)
+		*Fast killer (imp) (more sus)
+		*Sussy (any)
+		Slick (any) (opposite of sussy)
+		*Sus-thrower (any?)
+		*Crewpostor (imp - acts crewlike / helps crew?)
+		*Immate (crew - acts impy / helps the imps?)
+		*Third imp (crew - helps the imps)
+		*Sab-spammer (imp)
+		*Doesn't fix sabs (crew)
+		*Body ignorer (crew?)
+		Selfer (imp - high chance of reporting bodies they make, same turn or other)
+		*Lurker (imp - hides out in the same room and usually kills there)
+		*Cam-camper (any)
+		Strategist (any? - basically bigbraining)
+		*Detective (crew - actively tries to track down imp)
+		*DeFective (crew - tries to detective but bad at it)
+		Head Empty (any - lots of idles around instead of other idle text?)
+		Superstitious (any - picks a random other crewmember at start, and refuses to kill, vote, or sus that one)
+		*Paranoid (any)
+		*Biased (any - picks a random other crewmember and tries to get that one dead)
+		*Marinator (imp - able to hang out with a crewmate and convince that crewmate they're good)
+		*Gullible (crew - easily marinated)
+		Lucky - less likely to be killed early
+		Unlucky - more likely to be killed early
+		*Follower - finds someone and follows them around
+		*Eldritch (imp)
+		
+		*Scientist (crew - higher chance of finding bodies if there are any?)
+		Engineer (crew - can travel btwn rooms if those are implemented? higher chance of being sussed tho)
+		*Shapeshifter (imp)
+		
+		
+	* = would have its own flavor text for some things
+	
+	Perks taken from murdergames:
+		Leader (more likely to be agreed with)
+		Annoying (more likely to be ejected)
+		Cute (more likable)
+		Devious (willing to betray others)?
+	*/
+}
 
 
 
 // Events go here.
 {
 	const base_crew_idles = [
-		"thinks about doing a task, but doesn't feel like it.",
 		"idles around."
 	];
+	const tasks_remaining_idles = [
+		"starts a task, but loses interest.",
+		"struggles with their task, eventually giving up.",
+		"thinks about doing a task, but doesn't feel like it."
+	];
+	const base_imp_idles = [
+		"idles sussily."
+	];
+	const base_ghost_idles = [
+		"idles ghostily."
+	];
+	const interact_ghost_idles = [
+		"follows %s around curiously.",
+		"follows %s around suspiciously."
+	]; // Note that this %s etc works with console.log.
 	
-	const base_imp_idles = [];
-	const base_ghost_idles = [];
+	const task_lines = [
+		"cleans an entire pizza out of the vent...",
+		"manages to calibrate the distributor properly on their first try.",
+		"shoots at asteroids for a few minutes.",
+		"gets themself scanned... but no one saw."
+	];
+	const interact_task_lines = [
+		"gets themself scanned, while watched by %s."
+	];
+	const interrupted_task_lines = [
+		"was almost done with their download!"
+	];
+	const kill_interrupted_task_lines = [
+		"kills %s in the middle of their scan.",
+		"strangles %s with the wires they were fixing."
+	];
+	const kill_lines = [
+		"knocks %s to the floor, and shoots them while they're down.",
+		"sneaks up behind %s and snaps their neck.",
+		"stabs %s 17 times in the back with a hunting knife.",
+		"impales %s with a prehensile tentacle.",
+		"lulls %s into a false sense of security, before violently murdering them.",
+		"lulls %s into a false sense of security, before politely murdering them.",
+		"walks right up to %s and stabs them multiple times before casually walking away.",
+		"chops %s to pieces with a meat cleaver.",
+		"pops out of a vent and shoots %s.",
+		"corners %s in a secluded location, then shoots them and leaves them to die.",
+		"kills %s and shoves their body into a vent.",
+		"murders %s and arranges their body to look like they're just focusing really hard on a task.",
+		"murders %s and arranges their body to look like they're sleeping.",
+		"violently eviscerates %s, getting blood all over the place."
+	];
 	
-	const task_lines = [];
-	const interrupted_task_lines = [];
-	const kill_lines = [];
+	const meeting_accusation_lines = [];
+	const meeting_defense_lines = [];
 }

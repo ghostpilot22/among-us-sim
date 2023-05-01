@@ -1,12 +1,12 @@
 /*
-	Among Us Simulator, version 1.1.1
+	Among Us Simulator, version 1.1.2
 	Made by Sparrow.
 	Inspired by Orteil's Murdergames.
 */
 /*
 	Dev log
 	Changes:
-		Did some reorganization of the code blocks, and started on the perk system. 
+		A little more reorganization, more setup for the perks
 	Coming soon:
 		More flavor text
 		Perks (affecting flavor text as well as likelihood of tasking/killing)
@@ -30,16 +30,13 @@
 		Map options (would change the idles available, as well as the rooms if those get implemented)
 */
 
-// Setup of a round. Global variables, for now.
+// Setup of a game. Global variables, for now.
 // These need to be made dynamic and actually count the values.
 let initial_crewmate = 3; // set to number of crewmates
 let initial_impostor = 1; // set to number of imps
 let total_crew = initial_crewmate + initial_impostor; //Deprecated
 let TASKS = 4; // number of tasks
 let crew = [];
-
-
-
 
 // Constructor for character objects
 function Character(name, is_imp, alive, tasks_left, perk1, perk2, role, imp_lines, crew_lines)
@@ -53,7 +50,6 @@ function Character(name, is_imp, alive, tasks_left, perk1, perk2, role, imp_line
 	// Note to self: Store perk values as numbers but reference them by name? Or by variable names referencing numbers? I just don't want to have to type quotes around it every time.
 	// role, imp_lines, and crew_lines, all don't need to be initialized - they'll be assigned later
 }
-
 
 // Initializing DEFAULT characters.
 // Impostors are given tasks but the tasks are never tallied.
@@ -87,14 +83,71 @@ function setup_characters()
 // The sets of lines to assign from:
 const base = 
 {
-	crewmate: 
+	crew: 
 	{
-		idles: ["idles around."]
+		idles: [
+			"idles around."
+			],
+		ghost_idles: [
+			"idles ghostily."
+			],
+		interact_ghost_idles: [
+			"follows %s around curiously.",
+			"follows %s around suspiciously."
+			], // Note that this %s etc works with console.log.
+		tasks_remaining_idles: [
+			"starts a task, but loses interest.",
+			"struggles with their task, eventually giving up.",
+			"thinks about doing a task, but doesn't feel like it."
+			],
+		task_lines: [
+			"cleans an entire pizza out of the vent...",
+			"manages to calibrate the distributor properly on their first try.",
+			"shoots at asteroids for a few minutes.",
+			"gets themself scanned... but no one saw."
+			],
+		interact_task_lines: [
+			"gets themself scanned, while watched by %s."
+			],
+		interrupted_task_lines: [
+			"was almost done with their download!"
+			]
 	},
 	
 	imp:
 	{
-		idles: ["idles sussily."]
+		idles: [
+		"idles sussily."
+		],
+		ghost_idles: [
+			"idles ghostily."
+			],
+		interact_ghost_idles: [
+			"follows %s around curiously.",
+			"follows %s around evilly."
+			],
+		kill_interrupted_task_lines: [
+			"kills %s in the middle of their scan.",
+			"strangles %s with the wires they were fixing."
+			],
+		kill_lines: [
+			"knocks %s to the floor, and shoots them while they're down.",
+			"sneaks up behind %s and snaps their neck.",
+			"stabs %s 17 times in the back with a hunting knife.",
+			"impales %s with a prehensile tentacle.",
+			"lulls %s into a false sense of security, before violently murdering them.",
+			"lulls %s into a false sense of security, before politely murdering them.",
+			"walks right up to %s and stabs them multiple times before casually walking away.",
+			"chops %s to pieces with a meat cleaver.",
+			"pops out of a vent and shoots %s.",
+			"corners %s in a secluded location, then shoots them and leaves them to die.",
+			"kills %s and shoves their body into a vent.",
+			"murders %s and arranges their body to look like they're just focusing really hard on a task.",
+			"murders %s and arranges their body to look like they're sleeping.",
+			"violently eviscerates %s, getting blood all over the place."
+			],
+		meeting_accusation_lines: [],
+		meeting_defense_lines: []
 	}
 }
 
@@ -156,6 +209,76 @@ const base =
 	const meeting_defense_lines = [];
 }
 
+
+// Perks go here eventually - 
+// 2 Crew perks and 1 Imp perk for each character?
+// Or if you're pre-selecting the impostors, 2 for each character
+// Just name the perks here, and state modified chances
+// and chance of perk events + any needed variables
+// don't list perk events right here
+// Note to self: Are any perks mutually exclusive?
+//Perk ideas:
+/*
+	Slow tasker (crew) (more likely to be sussed/ejected?)
+	Fast tasker (crew)
+	*Slow killer (imp) (less sus)
+	*Fast killer (imp) (more sus)
+	*Sussy (any)
+	Slick (any) (opposite of sussy)
+	*Sus-thrower (any?)
+	*Crewpostor (imp - acts crewlike / helps crew?)
+	*Immate (crew - acts impy / helps the imps?)
+	*Third imp (crew - helps the imps)
+	*Sab-spammer (imp)
+	*Doesn't fix sabs (crew)
+	*Body ignorer (crew?)
+	Selfer (imp - high chance of reporting bodies they make, same turn or other)
+	*Lurker (imp - hides out in the same room and usually kills there)
+	*Cam-camper (any)
+	Strategist (any? - basically bigbraining)
+	*Detective (crew - actively tries to track down imp)
+	*DeFective (crew - tries to detective but bad at it)
+	Head Empty (any - lots of idles around instead of other idle text?)
+	Superstitious (any - picks a random other crewmember at start, and refuses to kill, vote, or sus that one)
+	*Paranoid (any)
+	*Biased (any - picks a random other crewmember and tries to get that one dead)
+	*Marinator (imp - able to hang out with a crewmate and convince that crewmate they're good)
+	*Gullible (crew - easily marinated)
+	Lucky - less likely to be killed early
+	Unlucky - more likely to be killed early
+	*Follower - finds someone and follows them around
+	*Eldritch (imp)
+	
+	*Scientist (crew - higher chance of finding bodies if there are any?)
+	Engineer (crew - can travel btwn rooms if those are implemented? higher chance of being sussed tho)
+	*Shapeshifter (imp)
+	
+	
+* = would have its own flavor text for some things
+
+Perks taken from murdergames:
+	Leader (more likely to be agreed with)
+	Annoying (more likely to be ejected)
+	Cute (more likable)
+	Devious (willing to betray others)?
+*/
+
+// Note to self: Have to figure out what order to store the lines in.
+// Perk(role(action? Or role(perk(action? Or action(perk(role?
+// I think perk(role(action might work best?
+function assign_lines(i) // Setting up the lines for a character.
+{
+	let PERK1 = crew[i].perk1 ? crew[i].perk1 : base;
+	let PERK2 = crew[i].perk2 ? crew[i].perk2 : base;
+	crew[i].imp_lines = 
+	{
+		idles: base.imp.idles.concat(PERK1.imp.idles, PERK2.imp.idles)
+	}
+	crew[i].crew_lines = 
+	{
+		idles: base.crew.idles.concat(PERK1.crew.idles, PERK2.crew.idles)
+	}
+}
 
 // Round (Part)
 // Returns 0 for nothing happens, 1 for body found, 2 for imp win, 3 for task win.
@@ -292,86 +415,6 @@ function check_tasks_done()
 				return false;
 	}
 	return true;
-}
-
-
-
-// Perks go here eventually - 
-// 2 Crew perks and 1 Imp perk for each character?
-// Or if you're pre-selecting the impostors, 2 for each character
-// Just name the perks here, and state modified chances
-// and chance of perk events + any needed variables
-// don't list perk events right here
-// Note to self: Are any perks mutually exclusive?
-//Perk ideas:
-/*
-	Slow tasker (crew) (more likely to be sussed/ejected?)
-	Fast tasker (crew)
-	*Slow killer (imp) (less sus)
-	*Fast killer (imp) (more sus)
-	*Sussy (any)
-	Slick (any) (opposite of sussy)
-	*Sus-thrower (any?)
-	*Crewpostor (imp - acts crewlike / helps crew?)
-	*Immate (crew - acts impy / helps the imps?)
-	*Third imp (crew - helps the imps)
-	*Sab-spammer (imp)
-	*Doesn't fix sabs (crew)
-	*Body ignorer (crew?)
-	Selfer (imp - high chance of reporting bodies they make, same turn or other)
-	*Lurker (imp - hides out in the same room and usually kills there)
-	*Cam-camper (any)
-	Strategist (any? - basically bigbraining)
-	*Detective (crew - actively tries to track down imp)
-	*DeFective (crew - tries to detective but bad at it)
-	Head Empty (any - lots of idles around instead of other idle text?)
-	Superstitious (any - picks a random other crewmember at start, and refuses to kill, vote, or sus that one)
-	*Paranoid (any)
-	*Biased (any - picks a random other crewmember and tries to get that one dead)
-	*Marinator (imp - able to hang out with a crewmate and convince that crewmate they're good)
-	*Gullible (crew - easily marinated)
-	Lucky - less likely to be killed early
-	Unlucky - more likely to be killed early
-	*Follower - finds someone and follows them around
-	*Eldritch (imp)
-	
-	*Scientist (crew - higher chance of finding bodies if there are any?)
-	Engineer (crew - can travel btwn rooms if those are implemented? higher chance of being sussed tho)
-	*Shapeshifter (imp)
-	
-	
-* = would have its own flavor text for some things
-
-Perks taken from murdergames:
-	Leader (more likely to be agreed with)
-	Annoying (more likely to be ejected)
-	Cute (more likable)
-	Devious (willing to betray others)?
-*/
-
-// Note to self: Have to figure out what order to store the lines in.
-// Perk(role(action? Or role(perk(action? Or action(perk(role?
-// I think perk(role(action might work best?
-function assign_lines(i) // Setting up the lines for a character.
-{
-	let PERK1 = crew[i].perk1 ? crew[i].perk1 : base;
-	let PERK2 = crew[i].perk2 ? crew[i].perk2 : base;
-	// This might not work. Have to check what's by ref and by val.
-	if(crew[i].is_imp)
-	{
-		crew[i].imp_lines = 
-		{
-			idles: base.imp.idles.concat(PERK1.imp.idles, PERK2.imp.idles)
-		}
-		
-	}
-	else
-	{
-		crew[i].crewmate_lines = 
-		{
-			idles: base.crewmate.idles.concat(PERK1.crewmate.idles, PERK2.crewmate.idles)
-		}
-	}
 }
 
 

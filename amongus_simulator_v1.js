@@ -1,14 +1,15 @@
 /*
-	Among Us Simulator, version 1.1.0
+	Among Us Simulator, version 1.1.1
 	Made by Sparrow.
 	Inspired by Orteil's Murdergames.
 */
 /*
 	Dev log
 	Changes:
-		Refactored the code to make it object-oriented. Now it's a lot nicer and more concise. 
+		Did some reorganization of the code blocks, and started on the perk system. 
 	Coming soon:
 		More flavor text
+		Perks (affecting flavor text as well as likelihood of tasking/killing)
 		Meetings and ejections
 		Dead impostors in general?
 		Randomizing the order of events in part-rounds?
@@ -16,7 +17,6 @@
 		Task bar at the end of each meeting
 	Coming less soon:
 		Random impostor mode
-		Perks (affecting flavor text as well as likelihood of tasking/killing)
 	Maybe coming eventually:
 		Suspiciousness levels that can change during meetings
 		Votes
@@ -30,6 +30,16 @@
 		Map options (would change the idles available, as well as the rooms if those get implemented)
 */
 
+// Setup of a round. Global variables, for now.
+// These need to be made dynamic and actually count the values.
+let initial_crewmate = 3; // set to number of crewmates
+let initial_impostor = 1; // set to number of imps
+let total_crew = initial_crewmate + initial_impostor; //Deprecated
+let TASKS = 4; // number of tasks
+let crew = [];
+
+
+
 
 // Constructor for character objects
 function Character(name, is_imp, alive, tasks_left, perk1, perk2, role, imp_lines, crew_lines)
@@ -40,114 +50,112 @@ function Character(name, is_imp, alive, tasks_left, perk1, perk2, role, imp_line
 	this.tasks_left = tasks_left;
 	this.perk1 = perk1;
 	this.perk2 = perk2;
+	// Note to self: Store perk values as numbers but reference them by name? Or by variable names referencing numbers? I just don't want to have to type quotes around it every time.
 	// role, imp_lines, and crew_lines, all don't need to be initialized - they'll be assigned later
 }
 
-// Setup of a round. Global variables, for now.
-// These need to be made dynamic and actually count the values.
-let initial_crewmate = 3; // set to number of crewmates
-let initial_impostor = 1; // set to number of imps
-let total_crew = initial_crewmate + initial_impostor; //Deprecated
-let TASKS = 4; // number of tasks
-let crew = [];
 
-// Initializing (default) characters.
+// Initializing DEFAULT characters.
 // Impostors are given tasks but the tasks are never tallied.
 // parameters are: name, imp status, alive status, number of tasks, perk 1, perk 2
+function init_default_characters()
 {
 	crew[crew.length] = new Character("Red", false, true, TASKS, 0,0);
 	crew[crew.length] = new Character("Blue", false, true, TASKS, 0,0);
 	crew[crew.length] = new Character("Yellow", true, true, TASKS, 0,0);
-	crew[crew.length] = new Character("Purple", false, true, TASKS,0,0);
+	crew[crew.length] = new Character("Purple", false, true, TASKS, 0,0);
 	// crew[crew.length] = new Character("name", imp status, alive status, TASKS, 0,0);
 }
 
-for(let i=0; i<crew.length; i++) // Setting default roles, and assigning lines.
+function setup_characters()
 {
-	if(crew[i].is_imp && !crew[i].role) // if imp and no role
-		crew[i].role = "Impostor";
-	else if(!crew[i].is_imp && !crew[i].role) // if crewmate and no role
-		crew[i].role = "Crewmate";
-	//assign_lines(i);
-}
-
-
-
-// Actual gameplay loop goes here
-// Not implementing rooms just yet heheh
-// Just the crewmates doing tasks and the impostors doing kills
-// Implement meeting button... later
-
-// Setup:
-{
-	var alive_crewmate = initial_crewmate;
-	var alive_impostor = initial_impostor;
-	var game_over = false;
-	var meeting = false;
-	var dead_this_round = 0;
-	var round_num = 1;
-	var part_num = 1;
-}
-// List the crew:
-{
-	console.log("\nCrew:");
-	for(let i=0; i<crew.length; i++)
+	for(let i=0; i<crew.length; i++) // Setting default roles, and assigning lines.
 	{
-		console.log(crew[i].name + " (" + crew[i].role + ")");
-	}
-	console.log("Each crewmate has " + TASKS + " tasks.");
-}
-
-//Gameplay loop:
-while(!game_over)
-{
-	while(!meeting && !game_over)
-	{
-		console.log("\n Round " + round_num + " Part " + part_num + "\n");
-		switch (round_part()) // Calls the function that runs a part of a round, and then tests the result.
-		{
-			case 1:
-				meeting = true;
-				break;
-			case 2: // If kill or task win
-			case 3: // then it's game over
-				game_over = true;
-				break;
-			case 0:
-			default:
-				part_num++;
+		if(crew[i].is_imp && !crew[i].role) // if imp and no role
+			crew[i].role = "Impostor";
+		else if(!crew[i].is_imp && !crew[i].role) // if crewmate and no role
+			crew[i].role = "Crewmate";
+		if(!crew[i].perk1 && crew[i].perk2)
+		{ // if perk 2 assigned but not 1
+			crew[i].perk1 = crew[i].perk2;
+			crew[i].perk2 = 0;
 		}
+		assign_lines(i);
 	}
+}
+
+// The sets of lines to assign from:
+const base = 
+{
+	crewmate: 
+	{
+		idles: ["idles around."]
+	},
 	
-	if(meeting)
+	imp:
 	{
-		console.log("An Emergency Meeting has been called!");
-		console.log("Unfortunately I haven't implemented meetings yet");
-		console.log("So nothing happens.");
-		round_num++;
-		part_num = 1;
-		dead_this_round = 0;
-		meeting = false;
+		idles: ["idles sussily."]
 	}
 }
 
-// Game over text:
+// OLD Line arrays go here. Might make this into an include instead. Currently enclosed in brackets for ease of collapsing only, not bc scope.
 {
-	console.log("Alive Crewmates: " + alive_crewmate);
-	console.log("Alive Impostors: " + alive_impostor);
-	console.log("\nCrew:");
-	for(var i=0; i<crew.length; i++)
-	{
-		if(crew[i].is_imp)
-		{
-			console.log(crew[i].name + " (Impostor) (" + (crew[i].alive ? "alive" : "dead") + ")");
-		}
-		else
-		{
-			console.log(crew[i].name + " (Crewmate) (" + (crew[i].alive ? "alive" : "dead") + ") (" + (TASKS - crew[i].tasks_left) + "/" + TASKS + " tasks)");
-		}
-	}
+	const base_crew_idles = [
+		"idles around."
+	];
+	const tasks_remaining_idles = [
+		"starts a task, but loses interest.",
+		"struggles with their task, eventually giving up.",
+		"thinks about doing a task, but doesn't feel like it."
+	];
+	const base_imp_idles = [
+		"idles sussily."
+	];
+	const base_ghost_idles = [
+		"idles ghostily."
+	];
+	const interact_ghost_idles = [
+		"follows %s around curiously.",
+		"follows %s around suspiciously."
+	]; // Note that this %s etc works with console.log.
+	
+	const task_lines = [
+		"cleans an entire pizza out of the vent...",
+		"manages to calibrate the distributor properly on their first try.",
+		"shoots at asteroids for a few minutes.",
+		"gets themself scanned... but no one saw."
+	];
+	const interact_task_lines = [
+		"gets themself scanned, while watched by %s."
+	];
+	const interrupted_task_lines = [
+		"was almost done with their download!"
+	];
+	const kill_interrupted_task_lines = [
+		"kills %s in the middle of their scan.",
+		"strangles %s with the wires they were fixing."
+	];
+	const kill_lines = [
+		"knocks %s to the floor, and shoots them while they're down.",
+		"sneaks up behind %s and snaps their neck.",
+		"stabs %s 17 times in the back with a hunting knife.",
+		"impales %s with a prehensile tentacle.",
+		"lulls %s into a false sense of security, before violently murdering them.",
+		"lulls %s into a false sense of security, before politely murdering them.",
+		"walks right up to %s and stabs them multiple times before casually walking away.",
+		"chops %s to pieces with a meat cleaver.",
+		"pops out of a vent and shoots %s.",
+		"corners %s in a secluded location, then shoots them and leaves them to die.",
+		"kills %s and shoves their body into a vent.",
+		"murders %s and arranges their body to look like they're just focusing really hard on a task.",
+		"murders %s and arranges their body to look like they're sleeping.",
+		"violently eviscerates %s, getting blood all over the place."
+	];
+	
+	const meeting_accusation_lines = [];
+	const meeting_defense_lines = [];
 }
+
 
 // Round (Part)
 // Returns 0 for nothing happens, 1 for body found, 2 for imp win, 3 for task win.
@@ -290,7 +298,7 @@ function check_tasks_done()
 
 // Perks go here eventually - 
 // 2 Crew perks and 1 Imp perk for each character?
-// Or if you're pre-selecting the impostors, 2 for each
+// Or if you're pre-selecting the impostors, 2 for each character
 // Just name the perks here, and state modified chances
 // and chance of perk events + any needed variables
 // don't list perk events right here
@@ -346,87 +354,108 @@ Perks taken from murdergames:
 // I think perk(role(action might work best?
 function assign_lines(i) // Setting up the lines for a character.
 {
+	let PERK1 = crew[i].perk1 ? crew[i].perk1 : base;
+	let PERK2 = crew[i].perk2 ? crew[i].perk2 : base;
+	// This might not work. Have to check what's by ref and by val.
 	if(crew[i].is_imp)
 	{
-		//crew[i].imp_lines = {
-		//	idles: base_imp_idles.concat();
-		//}
+		crew[i].imp_lines = 
+		{
+			idles: base.imp.idles.concat(PERK1.imp.idles, PERK2.imp.idles)
+		}
 		
 	}
 	else
 	{
+		crew[i].crewmate_lines = 
+		{
+			idles: base.crewmate.idles.concat(PERK1.crewmate.idles, PERK2.crewmate.idles)
+		}
+	}
+}
+
+
+// The main code. It's not named main because things go out of scope when I do that.
+{
+	init_default_characters();
+	setup_characters();
+
+	// Actual gameplay loop goes here
+	// Not implementing rooms just yet heheh
+	// Just the crewmates doing tasks and the impostors doing kills
+	// Implement meeting button... later
+
+	// Setup:
+	{
+		var alive_crewmate = initial_crewmate;
+		var alive_impostor = initial_impostor;
+		var game_over = false;
+		var meeting = false;
+		var dead_this_round = 0;
+		var round_num = 1;
+		var part_num = 1;
+	}
+	// List the crew:
+	{
+		console.log("\nCrew:");
+		for(let i=0; i<crew.length; i++)
+		{
+			console.log(crew[i].name + " (" + crew[i].role + ")");
+			//console.log(crew[i].imp_lines); // Debug
+			//console.log(crew[i].crew_lines); // Debug
+		}
+		console.log("Each crewmate has " + TASKS + " tasks.");
+	}
+
+	//Gameplay loop:
+	while(!game_over)
+	{
+		while(!meeting && !game_over)
+		{
+			console.log("\n Round " + round_num + " Part " + part_num + "\n");
+			switch (round_part()) // Calls the function that runs a part of a round, and then tests the result.
+			{
+				case 1:
+					meeting = true;
+					break;
+				case 2: // If kill or task win
+				case 3: // then it's game over
+					game_over = true;
+					break;
+				case 0:
+				default:
+					part_num++;
+			}
+		}
 		
+		if(meeting)
+		{
+			console.log("An Emergency Meeting has been called!");
+			console.log("Unfortunately I haven't implemented meetings yet");
+			console.log("So nothing happens.");
+			round_num++;
+			part_num = 1;
+			dead_this_round = 0;
+			meeting = false;
+		}
 	}
-}
 
-// The sets of lines to assign from:
-const base = 
-{
-	crew: 
+	// Game over text:
 	{
-		idles: ["idles around."]
-	},
-	
-	imp:
-	{
-		idles: ["idles sussily."]
+		console.log("Alive Crewmates: " + alive_crewmate);
+		console.log("Alive Impostors: " + alive_impostor);
+		console.log("\nCrew:");
+		for(var i=0; i<crew.length; i++)
+		{
+			if(crew[i].is_imp)
+			{
+				console.log(crew[i].name + " (Impostor) (" + (crew[i].alive ? "alive" : "dead") + ")");
+			}
+			else
+			{
+				console.log(crew[i].name + " (Crewmate) (" + (crew[i].alive ? "alive" : "dead") + ") (" + (TASKS - crew[i].tasks_left) + "/" + TASKS + " tasks)");
+			}
+		}
 	}
-}
 
-// Events go here.
-{
-	const base_crew_idles = [
-		"idles around."
-	];
-	const tasks_remaining_idles = [
-		"starts a task, but loses interest.",
-		"struggles with their task, eventually giving up.",
-		"thinks about doing a task, but doesn't feel like it."
-	];
-	const base_imp_idles = [
-		"idles sussily."
-	];
-	const base_ghost_idles = [
-		"idles ghostily."
-	];
-	const interact_ghost_idles = [
-		"follows %s around curiously.",
-		"follows %s around suspiciously."
-	]; // Note that this %s etc works with console.log.
-	
-	const task_lines = [
-		"cleans an entire pizza out of the vent...",
-		"manages to calibrate the distributor properly on their first try.",
-		"shoots at asteroids for a few minutes.",
-		"gets themself scanned... but no one saw."
-	];
-	const interact_task_lines = [
-		"gets themself scanned, while watched by %s."
-	];
-	const interrupted_task_lines = [
-		"was almost done with their download!"
-	];
-	const kill_interrupted_task_lines = [
-		"kills %s in the middle of their scan.",
-		"strangles %s with the wires they were fixing."
-	];
-	const kill_lines = [
-		"knocks %s to the floor, and shoots them while they're down.",
-		"sneaks up behind %s and snaps their neck.",
-		"stabs %s 17 times in the back with a hunting knife.",
-		"impales %s with a prehensile tentacle.",
-		"lulls %s into a false sense of security, before violently murdering them.",
-		"lulls %s into a false sense of security, before politely murdering them.",
-		"walks right up to %s and stabs them multiple times before casually walking away.",
-		"chops %s to pieces with a meat cleaver.",
-		"pops out of a vent and shoots %s.",
-		"corners %s in a secluded location, then shoots them and leaves them to die.",
-		"kills %s and shoves their body into a vent.",
-		"murders %s and arranges their body to look like they're just focusing really hard on a task.",
-		"murders %s and arranges their body to look like they're sleeping.",
-		"violently eviscerates %s, getting blood all over the place."
-	];
-	
-	const meeting_accusation_lines = [];
-	const meeting_defense_lines = [];
 }

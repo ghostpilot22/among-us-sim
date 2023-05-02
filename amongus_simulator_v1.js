@@ -1,14 +1,16 @@
 /*
-	Among Us Simulator, version 1.1.2
+	Among Us Simulator, version 1.2.1
 	Made by Sparrow.
 	Inspired by Orteil's Murdergames.
 */
 /*
 	Dev log
 	Changes:
-		A little more reorganization, more setup for the perks
+		Added flavor text: 3 tasks, 3 crew idles, 14 kills.
+		Ghost crewmates can have the new task flavortext too.
+		Ghost crewmates cannot use the failing at a task idle lines. This is a bug.
 	Coming soon:
-		More flavor text
+		MORE flavor text
 		Perks (affecting flavor text as well as likelihood of tasking/killing)
 		Meetings and ejections
 		Dead impostors in general?
@@ -83,134 +85,79 @@ function setup_characters()
 // The sets of lines to assign from:
 const base = 
 {
-	crew: 
-	{
-		idles: [
-			"idles around."
-			],
-		ghost_idles: [
-			"idles ghostily."
-			],
-		interact_ghost_idles: [
-			"follows %s around curiously.",
-			"follows %s around suspiciously."
-			], // Note that this %s etc works with console.log.
-		tasks_remaining_idles: [
-			"starts a task, but loses interest.",
-			"struggles with their task, eventually giving up.",
-			"thinks about doing a task, but doesn't feel like it."
-			],
-		task_lines: [
-			"cleans an entire pizza out of the vent...",
-			"manages to calibrate the distributor properly on their first try.",
-			"shoots at asteroids for a few minutes.",
-			"gets themself scanned... but no one saw."
-			],
-		interact_task_lines: [
-			"gets themself scanned, while watched by %s."
-			],
-		interrupted_task_lines: [
-			"was almost done with their download!"
-			]
-	},
-	
 	imp:
 	{
 		idles: [
-		"idles sussily."
+			" idles sussily."
 		],
 		ghost_idles: [
-			"idles ghostily."
+			" idles ghostily."
 			],
 		interact_ghost_idles: [
-			"follows %s around curiously.",
-			"follows %s around evilly."
+			" follows %s around curiously.",
+			" follows %s around evilly."
 			],
+		task_fake_lines: [], // TODO
 		kill_interrupted_task_lines: [
-			"kills %s in the middle of their scan.",
-			"strangles %s with the wires they were fixing."
+			" kills %s in the middle of their scan.",
+			" strangles %s with the wires they were fixing."
 			],
 		kill_lines: [
-			"knocks %s to the floor, and shoots them while they're down.",
-			"sneaks up behind %s and snaps their neck.",
-			"stabs %s 17 times in the back with a hunting knife.",
-			"impales %s with a prehensile tentacle.",
-			"lulls %s into a false sense of security, before violently murdering them.",
-			"lulls %s into a false sense of security, before politely murdering them.",
-			"walks right up to %s and stabs them multiple times before casually walking away.",
-			"chops %s to pieces with a meat cleaver.",
-			"pops out of a vent and shoots %s.",
-			"corners %s in a secluded location, then shoots them and leaves them to die.",
-			"kills %s and shoves their body into a vent.",
-			"murders %s and arranges their body to look like they're just focusing really hard on a task.",
-			"murders %s and arranges their body to look like they're sleeping.",
-			"violently eviscerates %s, getting blood all over the place."
+			" knocks %s to the floor, and shoots them while they're down.",
+			" sneaks up behind %s and snaps their neck.",
+			" stabs %s 17 times in the back with a hunting knife.",
+			" impales %s with a prehensile tentacle.",
+			" lulls %s into a false sense of security, before violently murdering them.",
+			" lulls %s into a false sense of security, before politely murdering them.",
+			" walks right up to %s and stabs them multiple times before casually walking away.",
+			" chops %s to pieces with a meat cleaver.",
+			" pops out of a vent and shoots %s.",
+			" corners %s in a secluded location, then shoots them and leaves them to die.",
+			" kills %s and shoves their body into a vent.",
+			" murders %s and arranges their body to look like they're just focusing really hard on a task.",
+			" murders %s and arranges their body to look like they're sleeping.",
+			" violently eviscerates %s, getting blood all over the place."
+			],
+		meeting_accusation_lines: [],
+		meeting_defense_lines: []
+	},
+
+	crew: 
+	{
+		idles: [
+			" idles around."
+			],
+		ghost_idles: [
+			" idles ghostily."
+			],
+		interact_ghost_idles: [
+			" follows %s around curiously.",
+			" follows %s around suspiciously."
+			], // Note that this %s etc works with console.log.
+		tasks_remaining_idles: [
+			" starts a task, but loses interest.",
+			" struggles with a task, eventually giving up.",
+			" thinks about doing a task, but doesn't feel like it."
+			],
+		task_lines: [
+			" cleans an entire pizza out of the vent...",
+			" manages to calibrate the distributor properly on their first try.",
+			" shoots at asteroids for a few minutes.",
+			" gets themself scanned... but no one saw."
+			],
+		interact_task_lines: [
+			" gets themself scanned, while watched by %s."
+			],
+		interrupted_task_lines: [
+			" was almost done with their download!"
 			],
 		meeting_accusation_lines: [],
 		meeting_defense_lines: []
 	}
-}
-
-// OLD Line arrays go here. Might make this into an include instead. Currently enclosed in brackets for ease of collapsing only, not bc scope.
-{
-	const base_crew_idles = [
-		"idles around."
-	];
-	const tasks_remaining_idles = [
-		"starts a task, but loses interest.",
-		"struggles with their task, eventually giving up.",
-		"thinks about doing a task, but doesn't feel like it."
-	];
-	const base_imp_idles = [
-		"idles sussily."
-	];
-	const base_ghost_idles = [
-		"idles ghostily."
-	];
-	const interact_ghost_idles = [
-		"follows %s around curiously.",
-		"follows %s around suspiciously."
-	]; // Note that this %s etc works with console.log.
-	
-	const task_lines = [
-		"cleans an entire pizza out of the vent...",
-		"manages to calibrate the distributor properly on their first try.",
-		"shoots at asteroids for a few minutes.",
-		"gets themself scanned... but no one saw."
-	];
-	const interact_task_lines = [
-		"gets themself scanned, while watched by %s."
-	];
-	const interrupted_task_lines = [
-		"was almost done with their download!"
-	];
-	const kill_interrupted_task_lines = [
-		"kills %s in the middle of their scan.",
-		"strangles %s with the wires they were fixing."
-	];
-	const kill_lines = [
-		"knocks %s to the floor, and shoots them while they're down.",
-		"sneaks up behind %s and snaps their neck.",
-		"stabs %s 17 times in the back with a hunting knife.",
-		"impales %s with a prehensile tentacle.",
-		"lulls %s into a false sense of security, before violently murdering them.",
-		"lulls %s into a false sense of security, before politely murdering them.",
-		"walks right up to %s and stabs them multiple times before casually walking away.",
-		"chops %s to pieces with a meat cleaver.",
-		"pops out of a vent and shoots %s.",
-		"corners %s in a secluded location, then shoots them and leaves them to die.",
-		"kills %s and shoves their body into a vent.",
-		"murders %s and arranges their body to look like they're just focusing really hard on a task.",
-		"murders %s and arranges their body to look like they're sleeping.",
-		"violently eviscerates %s, getting blood all over the place."
-	];
-	
-	const meeting_accusation_lines = [];
-	const meeting_defense_lines = [];
-}
-
+}	
 
 // Perks go here eventually - 
+/*
 // 2 Crew perks and 1 Imp perk for each character?
 // Or if you're pre-selecting the impostors, 2 for each character
 // Just name the perks here, and state modified chances
@@ -218,7 +165,6 @@ const base =
 // don't list perk events right here
 // Note to self: Are any perks mutually exclusive?
 //Perk ideas:
-/*
 	Slow tasker (crew) (more likely to be sussed/ejected?)
 	Fast tasker (crew)
 	*Slow killer (imp) (less sus)
@@ -263,21 +209,39 @@ Perks taken from murdergames:
 	Devious (willing to betray others)?
 */
 
-// Note to self: Have to figure out what order to store the lines in.
-// Perk(role(action? Or role(perk(action? Or action(perk(role?
-// I think perk(role(action might work best?
-function assign_lines(i) // Setting up the lines for a character.
+// Setting up the flavor text lines for a character.
+// Please note that this assigns a lot of duplicates. That's there for a reason I promise.
+// There's got to be a better way of doing this.
+// But right now this is all I can think of to create the pools of lines to pull from.
+function assign_lines(i)
 {
 	let PERK1 = crew[i].perk1 ? crew[i].perk1 : base;
 	let PERK2 = crew[i].perk2 ? crew[i].perk2 : base;
 	crew[i].imp_lines = 
-	{
-		idles: base.imp.idles.concat(PERK1.imp.idles, PERK2.imp.idles)
+	{ // : base.imp..concat(PERK1.imp., PERK2.imp.),
+		idles: base.imp.idles.concat(PERK1.imp.idles, PERK2.imp.idles),
+		ghost_idles: base.imp.ghost_idles.concat(PERK1.imp.ghost_idles, PERK2.imp.ghost_idles),
+		interact_ghost_idles: base.imp.interact_ghost_idles.concat(PERK1.imp.interact_ghost_idles, PERK2.imp.interact_ghost_idles),
+		kill_lines: base.imp.kill_lines.concat(PERK1.imp.kill_lines, PERK2.imp.kill_lines),
+		kill_interrupted_task_lines: base.imp.kill_lines.concat(base.imp.kill_interrupted_task_lines,PERK1.imp.kill_interrupted_task_lines, PERK2.imp.kill_interrupted_task_lines),
+		meeting_accusation_lines: base.imp.meeting_accusation_lines.concat(PERK1.imp.meeting_accusation_lines, PERK2.imp.meeting_accusation_lines),
+		meeting_defense_lines: base.imp.meeting_defense_lines.concat(PERK1.imp.meeting_defense_lines, PERK2.imp.meeting_defense_lines),
+		
 	}
 	crew[i].crew_lines = 
-	{
-		idles: base.crew.idles.concat(PERK1.crew.idles, PERK2.crew.idles)
+	{ // : base.crew..concat(PERK1.crew., PERK2.crew.),
+		idles: base.crew.idles.concat(PERK1.crew.idles, PERK2.crew.idles),
+		ghost_idles: base.crew.ghost_idles.concat(PERK1.crew.ghost_idles, PERK2.crew.ghost_idles),
+		interact_ghost_idles: base.crew.interact_ghost_idles.concat(PERK1.crew.interact_ghost_idles, PERK2.crew.interact_ghost_idles),
+		//tasks_remaining_idles: crew[i].crew_lines.idles.concat(base.crew.tasks_remaining_idles, PERK1.crew.tasks_remaining_idles, PERK2.crew.tasks_remaining_idles),
+		//tasks_remaining_ghost_idles: crew[i].crew_lines.ghost_idles.concat(base.crew.tasks_remaining_ghost_idles, PERK1.crew.tasks_remaining_ghost_idles, PERK2.crew.tasks_remaining_ghost_idles),
+		task_lines: base.crew.task_lines.concat(PERK1.crew.task_lines, PERK2.crew.task_lines),
+		interact_task_lines: base.crew.interact_task_lines.concat(PERK1.crew.interact_task_lines, PERK2.crew.interact_task_lines),
+		interrupted_task_lines: base.crew.interrupted_task_lines.concat(PERK1.crew.interrupted_task_lines, PERK2.crew.interrupted_task_lines),		
+		
 	}
+	crew[i].crew_lines.tasks_remaining_idles = crew[i].crew_lines.idles.concat(base.crew.tasks_remaining_idles, PERK1.crew.tasks_remaining_idles, PERK2.crew.tasks_remaining_idles);
+	crew[i].crew_lines.tasks_remaining_ghost_idles = crew[i].crew_lines.ghost_idles.concat(base.crew.tasks_remaining_ghost_idles, PERK1.crew.tasks_remaining_ghost_idles, PERK2.crew.tasks_remaining_ghost_idles);
 }
 
 // Round (Part)
@@ -303,7 +267,7 @@ function round_part()
 					return 1;
 				}
 			}
-			else ghost_action(i);
+			else ghost_crewmate_action(i);
 		}
 		
 		if(alive_impostor >= alive_crewmate)
@@ -337,7 +301,9 @@ function crewmate_action(i)
 			if(crew[i]["tasks_left"] > 0)
 			{
 				crew[i]["tasks_left"]--;
-				console.log(crew[i].name + " does a task! (" + crew[i].tasks_left + " left.)");
+				let line = Math.floor(Math.random() * crew[i].crew_lines.task_lines.length);
+				//console.log(crew[i].name + " does a task! (" + crew[i].tasks_left + " left.)");
+				console.log(crew[i].name + crew[i].crew_lines.task_lines[line] + " (" + crew[i].tasks_left + " tasks left.)");
 				return 0;
 				break;
 			}
@@ -348,7 +314,16 @@ function crewmate_action(i)
 				return 1;
 			} // no break - if there's no body, they idle
 		default: // case idle
-			console.log(crew[i].name + " idles around.");
+			if(crew[i].tasks_left)
+			{
+				let line = Math.floor(Math.random() * crew[i].crew_lines.tasks_remaining_idles.length);
+				console.log(crew[i].name + crew[i].crew_lines.tasks_remaining_idles[line]);
+			}
+			else 
+			{
+				let line = Math.floor(Math.random() * crew[i].crew_lines.idles.length);
+				console.log(crew[i].name + crew[i].crew_lines.idles[line]);
+			}
 			return 0;
 			break;
 	}
@@ -368,7 +343,9 @@ function impostor_action(i)
 			let vic = Math.floor(Math.random() * crew.length); // random int btwn 0 and crew.length
 			if(crew[vic].alive && !crew[vic].is_imp)
 			{
-				console.log(crew[i].name + " kills " + crew[vic].name + "!");
+				let line = Math.floor(Math.random() * crew[i].imp_lines.kill_lines.length);
+				console.log(crew[i].name + crew[i].imp_lines.kill_lines[line], crew[vic].name);
+				//console.log(crew[i].name + " kills " + crew[vic].name + "!");
 				crew[vic].alive = false;
 				alive_crewmate--;
 				dead_this_round++;
@@ -381,20 +358,31 @@ function impostor_action(i)
 }
 
 // Dead crew can still do tasks!
-function ghost_action(i)
+function ghost_crewmate_action(i)
 {
 	let pick = Math.floor(Math.random() * 2);// get a random int between, for now, 0 and 1
 	switch(pick)
 	{
 		case 0:
-			if(crew[i].tasks_left > 0)
+			if(crew[i].tasks_left)
 			{
 				crew[i].tasks_left--;
-				console.log(crew[i].name + " does a task while dead! (" + crew[i].tasks_left + " left.)");
+				let line = Math.floor(Math.random() * crew[i].crew_lines.task_lines.length);
+				//console.log(crew[i].name + " does a task while dead! (" + crew[i].tasks_left + " left.)");
+				console.log("The deceased " + crew[i].name + crew[i].crew_lines.task_lines[line] + " (" + crew[i].tasks_left + " tasks left.)");
 				break;
 			}
-		default:
-			console.log(crew[i].name + " idles ghostily.");
+		default: // Tasks remaining ghost idles is broken
+			/*if(crew[i].tasks_left)
+			{
+				let line = Math.floor(Math.random() * crew[i].crew_lines.tasks_remaining_ghost_idles.length);
+				console.log(crew[i].name + crew[i].crew_lines.tasks_remaining_ghost_idles[line]);
+			}
+			else*/
+			{
+				let line = Math.floor(Math.random() * crew[i].crew_lines.ghost_idles.length);
+				console.log(crew[i].name + crew[i].crew_lines.ghost_idles[line]);
+			}
 			break;
 	}
 }
@@ -474,7 +462,7 @@ function check_tasks_done()
 		if(meeting)
 		{
 			console.log("An Emergency Meeting has been called!");
-			console.log("Unfortunately I haven't implemented meetings yet");
+			console.log("Unfortunately I haven't implemented meetings yet.");
 			console.log("So nothing happens.");
 			round_num++;
 			part_num = 1;
